@@ -1,0 +1,5 @@
+{
+  "name": "Lyria 3",
+  "description": "Rapid music prototype engine for high-quality demo tracks.",
+  "requestFramePermissions": ["camera", "microphone"]
+}
