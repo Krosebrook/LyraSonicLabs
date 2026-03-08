@@ -1,6 +1,6 @@
 import React from 'react';
 import { GeneratedTrack } from '../types';
-import { Play, Pause, Download, Share2, Music, Sparkles, Quote, Image as ImageIcon, Zap, Mic } from 'lucide-react';
+import { Play, Pause, Download, Share2, Music, Sparkles, Quote, Image as ImageIcon, Zap, Mic, Repeat } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface TrackDisplayProps {
@@ -12,8 +12,24 @@ export const TrackDisplay: React.FC<TrackDisplayProps> = ({ track }) => {
   const [isMelodyPlaying, setIsMelodyPlaying] = React.useState(false);
   const [duration, setDuration] = React.useState(0);
   const [currentTime, setCurrentTime] = React.useState(0);
+  const [activeLoop, setActiveLoop] = React.useState<{start: number, end: number, label: string} | null>(null);
   const audioRef = React.useRef<HTMLAudioElement>(null);
   const melodyAudioRef = React.useRef<HTMLAudioElement>(null);
+
+  const loopRegions = React.useMemo(() => {
+    if (!track.emotionalArc) return [];
+    const regex = /(\d+)-(\d+)s:\s*([^,]+)/g;
+    const regions = [];
+    let match;
+    while ((match = regex.exec(track.emotionalArc)) !== null) {
+      regions.push({
+        start: parseInt(match[1], 10),
+        end: parseInt(match[2], 10),
+        label: match[3].trim()
+      });
+    }
+    return regions;
+  }, [track.emotionalArc]);
 
   const togglePlay = () => {
     if (audioRef.current) {
@@ -53,7 +69,30 @@ export const TrackDisplay: React.FC<TrackDisplayProps> = ({ track }) => {
 
   const handleTimeUpdate = () => {
     if (audioRef.current) {
-      setCurrentTime(audioRef.current.currentTime);
+      const current = audioRef.current.currentTime;
+      setCurrentTime(current);
+      
+      if (activeLoop && current >= activeLoop.end) {
+        audioRef.current.currentTime = activeLoop.start;
+      }
+    }
+  };
+
+  const toggleLoop = (region: {start: number, end: number, label: string}) => {
+    if (activeLoop?.label === region.label) {
+      setActiveLoop(null);
+    } else {
+      setActiveLoop(region);
+      if (audioRef.current) {
+        audioRef.current.currentTime = region.start;
+        if (!isPlaying) {
+          audioRef.current.play().catch(e => {
+            console.error("Audio playback failed:", e);
+            setIsPlaying(false);
+          });
+          setIsPlaying(true);
+        }
+      }
     }
   };
 
@@ -197,6 +236,29 @@ export const TrackDisplay: React.FC<TrackDisplayProps> = ({ track }) => {
                 style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }}
               />
             </div>
+            
+            {loopRegions.length > 0 && track.audioUrl && (
+              <div className="pt-4 space-y-2">
+                <label className="status-label flex items-center gap-2">
+                  <Repeat className="w-3 h-3" /> Loop Sections
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {loopRegions.map((region, i) => (
+                    <button
+                      key={i}
+                      onClick={() => toggleLoop(region)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-mono border transition-colors ${
+                        activeLoop?.label === region.label 
+                          ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400' 
+                          : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
+                      }`}
+                    >
+                      {region.start}-{region.end}s: {region.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
         {!track.audioUrl && (

@@ -21,7 +21,13 @@ export default function App() {
       const lyricsToSing = params.customLyrics || metadata.lyrics;
 
       if (lyricsToSing && (params.vocals === 'AI Lyrics' || params.vocals === 'Vocal Textures Only')) {
-        const url = await generateVocalDemo(lyricsToSing, params.vocalPreset);
+        const url = await generateVocalDemo(
+          lyricsToSing, 
+          params.vocalPreset,
+          params.pitch,
+          params.speed,
+          params.intonation
+        );
         if (url) audioUrl = url;
       }
 

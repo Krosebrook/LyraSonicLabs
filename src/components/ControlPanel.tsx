@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { Genre, EnergyLevel, VocalPresence, VocalPreset, GenerationParams } from '../types';
-import { Music, Zap, Mic, Image as ImageIcon, Video, Send, Loader2, X } from 'lucide-react';
+import { Genre, EnergyLevel, VocalPresence, VocalPreset, GenerationParams, PitchLevel, SpeedLevel, IntonationLevel } from '../types';
+import { Music, Zap, Mic, Image as ImageIcon, Video, Send, Loader2, X, SlidersHorizontal } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -20,7 +20,10 @@ const GENRES: Genre[] = [
 ];
 const ENERGIES: EnergyLevel[] = ['Low', 'Medium', 'High'];
 const VOCALS: VocalPresence[] = ['Instrumental', 'AI Lyrics', 'Vocal Textures Only'];
-const VOCAL_PRESETS: VocalPreset[] = ['Default', 'Male High', 'Female Low', 'Choir', 'Robot'];
+const VOCAL_PRESETS: VocalPreset[] = ['Default', 'Male High', 'Female Low', 'Choir', 'Robot', 'Ethereal Whisper', 'Gritty Rock', 'Pop Diva', 'Spoken Word'];
+const PITCHES: PitchLevel[] = ['Low', 'Normal', 'High'];
+const SPEEDS: SpeedLevel[] = ['Slow', 'Normal', 'Fast'];
+const INTONATIONS: IntonationLevel[] = ['Flat', 'Expressive', 'Melodic'];
 
 export const ControlPanel: React.FC<ControlPanelProps> = ({ onGenerate, isGenerating }) => {
   const [params, setParams] = useState<Partial<GenerationParams>>({
@@ -28,6 +31,9 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onGenerate, isGenera
     energy: 'Medium',
     vocals: 'AI Lyrics',
     vocalPreset: 'Default',
+    pitch: 'Normal',
+    speed: 'Normal',
+    intonation: 'Expressive',
     useCase: 'Promo video for a new tech gadget',
     instrumentation: 'Analog synths, drum machines',
     emotionalArc: 'Start calm and introspective, build to a hopeful and uplifting climax, and end with a sense of resolution'
@@ -192,16 +198,47 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onGenerate, isGenera
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="space-y-2 overflow-hidden"
+              className="space-y-4 overflow-hidden"
             >
-              <label className="status-label">Vocal Preset</label>
-              <select
-                className="input-field w-full bg-[#1a1b1e] text-sm"
-                value={params.vocalPreset}
-                onChange={e => setParams(prev => ({ ...prev, vocalPreset: e.target.value as VocalPreset }))}
-              >
-                {VOCAL_PRESETS.map(v => <option key={v} value={v}>{v}</option>)}
-              </select>
+              <div className="space-y-2">
+                <label className="status-label">Vocal Preset</label>
+                <select
+                  className="input-field w-full bg-[#1a1b1e] text-sm"
+                  value={params.vocalPreset}
+                  onChange={e => setParams(prev => ({ ...prev, vocalPreset: e.target.value as VocalPreset }))}
+                >
+                  {VOCAL_PRESETS.map(v => <option key={v} value={v}>{v}</option>)}
+                </select>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="status-label flex items-center gap-2">
+                  <SlidersHorizontal className="w-3 h-3" /> Vocal Delivery
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  <select
+                    className="input-field w-full bg-[#1a1b1e] text-xs px-2"
+                    value={params.pitch}
+                    onChange={e => setParams(prev => ({ ...prev, pitch: e.target.value as PitchLevel }))}
+                  >
+                    {PITCHES.map(p => <option key={p} value={p}>Pitch: {p}</option>)}
+                  </select>
+                  <select
+                    className="input-field w-full bg-[#1a1b1e] text-xs px-2"
+                    value={params.speed}
+                    onChange={e => setParams(prev => ({ ...prev, speed: e.target.value as SpeedLevel }))}
+                  >
+                    {SPEEDS.map(s => <option key={s} value={s}>Speed: {s}</option>)}
+                  </select>
+                  <select
+                    className="input-field w-full bg-[#1a1b1e] text-xs px-2"
+                    value={params.intonation}
+                    onChange={e => setParams(prev => ({ ...prev, intonation: e.target.value as IntonationLevel }))}
+                  >
+                    {INTONATIONS.map(i => <option key={i} value={i}>Vibe: {i}</option>)}
+                  </select>
+                </div>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

@@ -141,24 +141,60 @@ function createWavUrl(base64Pcm: string, sampleRate: number = 24000): string {
   return URL.createObjectURL(blob);
 }
 
-export async function generateVocalDemo(lyrics: string, preset: VocalPreset = 'Default'): Promise<string | null> {
+export async function generateVocalDemo(
+  lyrics: string, 
+  preset: VocalPreset = 'Default',
+  pitch: string = 'Normal',
+  speed: string = 'Normal',
+  intonation: string = 'Expressive'
+): Promise<string | null> {
   try {
     let voiceName = 'Zephyr';
-    let promptPrefix = 'Sing the following lyrics slowly and melodically, stretching out the words and adding long pauses between lines:\n\n';
-
+    
+    // Base prompt based on preset
+    let basePrompt = 'Sing the following lyrics';
     if (preset === 'Male High') {
       voiceName = 'Fenrir';
-      promptPrefix = 'Sing the following lyrics in a high-pitched male voice, slowly and melodically, stretching out the words and adding long pauses between lines:\n\n';
+      basePrompt = 'Sing the following lyrics in a male voice';
     } else if (preset === 'Female Low') {
       voiceName = 'Kore';
-      promptPrefix = 'Sing the following lyrics in a low-pitched, deep female voice, slowly and melodically, stretching out the words and adding long pauses between lines:\n\n';
+      basePrompt = 'Sing the following lyrics in a deep female voice';
     } else if (preset === 'Choir') {
       voiceName = 'Charon';
-      promptPrefix = 'Sing the following lyrics as if you are a large choir, with a grand and echoing voice, slowly and melodically:\n\n';
+      basePrompt = 'Sing the following lyrics as if you are a large choir, with a grand and echoing voice';
     } else if (preset === 'Robot') {
       voiceName = 'Puck';
-      promptPrefix = 'Sing the following lyrics in a robotic, synthesized voice, slowly and mechanically, stretching out the words:\n\n';
+      basePrompt = 'Sing the following lyrics in a robotic, synthesized voice';
+    } else if (preset === 'Ethereal Whisper') {
+      voiceName = 'Zephyr';
+      basePrompt = 'Whisper the following lyrics in an ethereal, breathy, and haunting voice';
+    } else if (preset === 'Gritty Rock') {
+      voiceName = 'Fenrir';
+      basePrompt = 'Sing the following lyrics with a gritty, raspy, and powerful rock vocal style';
+    } else if (preset === 'Pop Diva') {
+      voiceName = 'Zephyr';
+      basePrompt = 'Sing the following lyrics with the powerful, clear, and confident voice of a pop diva';
+    } else if (preset === 'Spoken Word') {
+      voiceName = 'Kore';
+      basePrompt = 'Speak the following lyrics rhythmically and dramatically, like a spoken word poetry performance';
     }
+
+    // Apply pitch modifier
+    let pitchModifier = '';
+    if (pitch === 'High') pitchModifier = ', with a high-pitched tone';
+    else if (pitch === 'Low') pitchModifier = ', with a low-pitched tone';
+
+    // Apply speed modifier
+    let speedModifier = ' slowly';
+    if (speed === 'Fast') speedModifier = ' quickly and energetically';
+    else if (speed === 'Normal') speedModifier = ' at a moderate pace';
+
+    // Apply intonation modifier
+    let intonationModifier = ' and melodically';
+    if (intonation === 'Flat') intonationModifier = ' with a flat, monotonous intonation';
+    else if (intonation === 'Expressive') intonationModifier = ' with highly expressive and emotional intonation';
+
+    const promptPrefix = `${basePrompt}${pitchModifier},${speedModifier}${intonationModifier}, stretching out the words and adding long pauses between lines:\n\n`;
 
     // Manually repeat the lyrics to ensure the generated audio is long enough
     const repeatedLyrics = `${lyrics}\n\n(musical pause)\n\n${lyrics}\n\n(musical pause)\n\n${lyrics}`;
