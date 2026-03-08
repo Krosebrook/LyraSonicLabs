@@ -22,6 +22,7 @@ export interface GenerationParams {
   instrumentation: string;
   vocals: VocalPresence;
   emotionalArc?: string;
+  customLyrics?: string;
 }
 
 export interface GeneratedTrack extends TrackMetadata {

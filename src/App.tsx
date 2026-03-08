@@ -17,13 +17,16 @@ export default function App() {
       const metadata = await analyzeInspiration(params);
       let audioUrl: string | undefined;
       
-      if (metadata.lyrics && (params.vocals === 'AI Lyrics' || params.vocals === 'Vocal Textures Only')) {
-        const url = await generateVocalDemo(metadata.lyrics);
+      const lyricsToSing = params.customLyrics || metadata.lyrics;
+
+      if (lyricsToSing && (params.vocals === 'AI Lyrics' || params.vocals === 'Vocal Textures Only')) {
+        const url = await generateVocalDemo(lyricsToSing);
         if (url) audioUrl = url;
       }
 
       const newTrack: GeneratedTrack = {
         ...metadata,
+        lyrics: lyricsToSing,
         audioUrl,
         timestamp: Date.now(),
         genre: params.genre,

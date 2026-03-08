@@ -99,8 +99,9 @@ function addWavHeader(base64Pcm: string, sampleRate: number = 24000): string {
   wavBuffer.set(pcmData, header.byteLength);
 
   let binary = '';
-  for (let i = 0; i < wavBuffer.length; i++) {
-    binary += String.fromCharCode(wavBuffer[i]);
+  const encodeChunkSize = 0x8000;
+  for (let i = 0; i < wavBuffer.length; i += encodeChunkSize) {
+    binary += String.fromCharCode.apply(null, Array.from(wavBuffer.subarray(i, i + encodeChunkSize)));
   }
   return btoa(binary);
 }
@@ -109,7 +110,7 @@ export async function generateVocalDemo(lyrics: string): Promise<string | null> 
   try {
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
-      contents: [{ parts: [{ text: `Sing or speak these lyrics with a musical cadence, stretching the vowels and adding pauses to fill approximately 20-30 seconds of audio. Repeat lines if necessary to reach the duration: ${lyrics}` }] }],
+      contents: [{ parts: [{ text: `Sing the following lyrics slowly and musically, stretching out the words and adding long pauses between lines to make the audio last at least 20 seconds. Repeat the lyrics twice: ${lyrics}` }] }],
       config: {
         responseModalities: [Modality.AUDIO],
         speechConfig: {

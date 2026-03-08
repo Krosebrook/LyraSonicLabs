@@ -184,6 +184,25 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onGenerate, isGenera
           </div>
         </div>
 
+        <AnimatePresence>
+          {params.vocals === 'AI Lyrics' && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="space-y-2 overflow-hidden"
+            >
+              <label className="status-label">Custom Lyrics (Optional)</label>
+              <textarea
+                className="input-field w-full min-h-[80px] text-sm resize-none"
+                placeholder="Enter your own lyrics, or leave blank for AI generation..."
+                value={params.customLyrics || ''}
+                onChange={e => setParams(prev => ({ ...prev, customLyrics: e.target.value }))}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <button
           type="submit"
           disabled={isGenerating}
