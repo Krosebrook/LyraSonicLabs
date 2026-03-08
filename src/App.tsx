@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ControlPanel } from './components/ControlPanel';
 import { TrackDisplay } from './components/TrackDisplay';
 import { GenerationParams, GeneratedTrack } from './types';
-import { analyzeInspiration, generateVocalDemo } from './services/gemini';
+import { analyzeInspiration, generateVocalDemo, generateMelodyDemo } from './services/gemini';
 import { Music2, History, Settings, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -16,18 +16,25 @@ export default function App() {
     try {
       const metadata = await analyzeInspiration(params);
       let audioUrl: string | undefined;
+      let melodyAudioUrl: string | undefined;
       
       const lyricsToSing = params.customLyrics || metadata.lyrics;
 
       if (lyricsToSing && (params.vocals === 'AI Lyrics' || params.vocals === 'Vocal Textures Only')) {
-        const url = await generateVocalDemo(lyricsToSing);
+        const url = await generateVocalDemo(lyricsToSing, params.vocalPreset);
         if (url) audioUrl = url;
+      }
+
+      if (metadata.leadMelody) {
+        const url = await generateMelodyDemo(metadata.leadMelody);
+        if (url) melodyAudioUrl = url;
       }
 
       const newTrack: GeneratedTrack = {
         ...metadata,
         lyrics: lyricsToSing,
         audioUrl,
+        melodyAudioUrl,
         timestamp: Date.now(),
         genre: params.genre,
         energy: params.energy

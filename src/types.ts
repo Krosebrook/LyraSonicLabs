@@ -1,6 +1,7 @@
 export type Genre = string;
 export type EnergyLevel = 'Low' | 'Medium' | 'High';
 export type VocalPresence = 'Instrumental' | 'AI Lyrics' | 'Vocal Textures Only';
+export type VocalPreset = 'Default' | 'Male High' | 'Female Low' | 'Choir' | 'Robot';
 
 export interface TrackMetadata {
   title: string;
@@ -10,6 +11,7 @@ export interface TrackMetadata {
   albumArtVibe: string;
   emotionalArc?: string;
   vocalTextures?: string;
+  leadMelody?: string;
 }
 
 export interface GenerationParams {
@@ -21,12 +23,14 @@ export interface GenerationParams {
   energy: EnergyLevel;
   instrumentation: string;
   vocals: VocalPresence;
+  vocalPreset?: VocalPreset;
   emotionalArc?: string;
   customLyrics?: string;
 }
 
 export interface GeneratedTrack extends TrackMetadata {
   audioUrl?: string;
+  melodyAudioUrl?: string;
   timestamp: number;
   genre: Genre;
   energy: EnergyLevel;

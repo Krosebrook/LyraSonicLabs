@@ -9,18 +9,39 @@ interface TrackDisplayProps {
 
 export const TrackDisplay: React.FC<TrackDisplayProps> = ({ track }) => {
   const [isPlaying, setIsPlaying] = React.useState(false);
+  const [isMelodyPlaying, setIsMelodyPlaying] = React.useState(false);
   const [duration, setDuration] = React.useState(0);
   const [currentTime, setCurrentTime] = React.useState(0);
   const audioRef = React.useRef<HTMLAudioElement>(null);
+  const melodyAudioRef = React.useRef<HTMLAudioElement>(null);
 
   const togglePlay = () => {
     if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
       } else {
-        audioRef.current.play();
+        if (isMelodyPlaying) toggleMelodyPlay();
+        audioRef.current.play().catch(e => {
+          console.error("Audio playback failed:", e);
+          setIsPlaying(false);
+        });
       }
       setIsPlaying(!isPlaying);
+    }
+  };
+
+  const toggleMelodyPlay = () => {
+    if (melodyAudioRef.current) {
+      if (isMelodyPlaying) {
+        melodyAudioRef.current.pause();
+      } else {
+        if (isPlaying) togglePlay();
+        melodyAudioRef.current.play().catch(e => {
+          console.error("Melody playback failed:", e);
+          setIsMelodyPlaying(false);
+        });
+      }
+      setIsMelodyPlaying(!isMelodyPlaying);
     }
   };
 
@@ -95,6 +116,28 @@ export const TrackDisplay: React.FC<TrackDisplayProps> = ({ track }) => {
               {track.productionDescription}
             </p>
           </div>
+
+          {track.leadMelody && (
+            <div className="space-y-2">
+              <label className="status-label flex items-center gap-2">
+                <Music className="w-3 h-3" /> Lead Melody
+              </label>
+              <div className="flex items-start gap-4">
+                <p className="text-sm text-white/60 leading-relaxed font-mono flex-1">
+                  {track.leadMelody}
+                </p>
+                {track.melodyAudioUrl && (
+                  <button 
+                    onClick={toggleMelodyPlay}
+                    className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center hover:bg-emerald-500/40 transition-colors shrink-0"
+                    title="Play Melody Demo"
+                  >
+                    {isMelodyPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="space-y-6">
@@ -170,6 +213,14 @@ export const TrackDisplay: React.FC<TrackDisplayProps> = ({ track }) => {
           onTimeUpdate={handleTimeUpdate}
           onLoadedMetadata={handleLoadedMetadata}
           onEnded={() => setIsPlaying(false)}
+          className="hidden"
+        />
+      )}
+      {track.melodyAudioUrl && (
+        <audio
+          ref={melodyAudioRef}
+          src={track.melodyAudioUrl}
+          onEnded={() => setIsMelodyPlaying(false)}
           className="hidden"
         />
       )}

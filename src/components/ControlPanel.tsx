@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Genre, EnergyLevel, VocalPresence, GenerationParams } from '../types';
+import { Genre, EnergyLevel, VocalPresence, VocalPreset, GenerationParams } from '../types';
 import { Music, Zap, Mic, Image as ImageIcon, Video, Send, Loader2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
@@ -20,12 +20,14 @@ const GENRES: Genre[] = [
 ];
 const ENERGIES: EnergyLevel[] = ['Low', 'Medium', 'High'];
 const VOCALS: VocalPresence[] = ['Instrumental', 'AI Lyrics', 'Vocal Textures Only'];
+const VOCAL_PRESETS: VocalPreset[] = ['Default', 'Male High', 'Female Low', 'Choir', 'Robot'];
 
 export const ControlPanel: React.FC<ControlPanelProps> = ({ onGenerate, isGenerating }) => {
   const [params, setParams] = useState<Partial<GenerationParams>>({
     genre: 'Synthwave',
     energy: 'Medium',
     vocals: 'AI Lyrics',
+    vocalPreset: 'Default',
     useCase: 'Promo video for a new tech gadget',
     instrumentation: 'Analog synths, drum machines',
     emotionalArc: 'Start calm and introspective, build to a hopeful and uplifting climax, and end with a sense of resolution'
@@ -183,6 +185,26 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onGenerate, isGenera
             </select>
           </div>
         </div>
+
+        <AnimatePresence>
+          {params.vocals !== 'Instrumental' && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="space-y-2 overflow-hidden"
+            >
+              <label className="status-label">Vocal Preset</label>
+              <select
+                className="input-field w-full bg-[#1a1b1e] text-sm"
+                value={params.vocalPreset}
+                onChange={e => setParams(prev => ({ ...prev, vocalPreset: e.target.value as VocalPreset }))}
+              >
+                {VOCAL_PRESETS.map(v => <option key={v} value={v}>{v}</option>)}
+              </select>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <AnimatePresence>
           {params.vocals === 'AI Lyrics' && (
